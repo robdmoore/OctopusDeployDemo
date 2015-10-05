@@ -1,0 +1,291 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string",
+      "allowedValues": [
+        "West US",
+        "East US",
+        "West Europe",
+        "East Asia",
+        "Southeast Asia"
+      ],
+      "metadata": {
+        "description": "Location of resources"
+      }
+    },
+    "vmStorageAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "Storage Account Name"
+      }
+    },
+    "vmStorageAccountType": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "metadata": {
+        "description": "Type of the Storage Account"
+      }
+    },
+    "vmName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the VM"
+      }
+    },
+    "vmSize": {
+      "type": "string",
+      "defaultValue": "Standard_A2",
+      "metadata": {
+        "description": "Size of the VM"
+      }
+    },
+    "adminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "Admin username"
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Admin password"
+      }
+    },
+    "sqlServerName": {
+        "type": "string"
+    },
+    "sqlServerAdminUsername": {
+        "type": "string"
+    },
+    "sqlServerAdminPassword": {
+        "type": "securestring"
+    },
+    "sqlDbName": {
+        "type": "string"
+    },
+    "sqlDbCollation": {
+        "type": "string",
+        "defaultValue": "SQL_Latin1_General_CP1_CI_AS"
+    },
+    "sqlDbEdition": {
+        "type": "string",
+        "defaultValue": "Web"
+    },
+    "sqlDbMaxSizeBytes": {
+        "type": "string",
+        "defaultValue": "1073741824"
+    },
+    "sqlDbServiceObjectiveId": {
+        "type": "string",
+        "defaultValue": "910b4fcb-8a29-4c3e-958f-f7ba794388b2"
+    },
+    "networkDnsName": {
+      "type": "string",
+      "metadata": {
+        "description": "Unique DNS Name used to access the IIS server via HTTP or RDP."
+      }
+    }
+  },
+  "variables": {
+    "imageSKU": "2012-R2-Datacenter",
+    "virtualNetworkName": "IISVNet",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+    "vnetAddressPrefix": "10.0.0.0/16",
+    "subnet1Name": "IISSubnet-1",
+    "subnet1Prefix": "10.0.0.0/24",
+    "subnet1Ref": "[concat(variables('vnetID'),'/subnets/', variables('subnet1Name'))]",
+    "publicIPAddressType": "Dynamic",
+    "publicIPAddressName": "IISPublicIP",
+    "nicName": "IISNIC",
+    "imagePublisher": "MicrosoftWindowsServer",
+    "imageOffer": "WindowsServer",
+    "vmExtensionName": "dscExtension",
+    "IISPowerShellModuleUrl": "https://github.com/Azure/azure-quickstart-templates/raw/master/dsc-extension-iis-server-windows-vm/ContosoWebsite.ps1.zip",
+    "IISPowerShellModuleConfigurationFunction": "ContosoWebsite.ps1\\ContosoWebsite"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[parameters('vmStorageAccountName')]",
+      "apiVersion": "2015-05-01-preview",
+      "location": "[parameters('location')]",
+      "properties": {
+        "accountType": "[parameters('vmStorageAccountType')]"
+      }
+    },
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('publicIPAddressName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('networkDnsName')]"
+        }
+      }
+    },
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[variables('virtualNetworkName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('vnetAddressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnet1Name')]",
+            "properties": {
+              "addressPrefix": "[variables('subnet1Prefix')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('nicName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
+              },
+              "subnet": {
+                "id": "[variables('subnet1Ref')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[parameters('vmName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/', parameters('vmStorageAccountName'))]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "osProfile": {
+          "computername": "[parameters('vmName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('imagePublisher')]",
+            "offer": "[variables('imageOffer')]",
+            "sku": "[variables('imageSKU')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "osdisk",
+            "vhd": {
+              "uri": "[concat('http://',parameters('vmStorageAccountName'),'.blob.core.windows.net/vhds/','osdisk.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(parameters('vmName'),'/', variables('vmExtensionName'))]",
+      "apiVersion": "2015-05-01-preview",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+      ],
+      "properties": {
+        "publisher": "Microsoft.Powershell",
+        "type": "DSC",
+        "typeHandlerVersion": "1.9",
+        "settings": {
+          "ModulesUrl": "[variables('IISPowerShellModuleUrl')]",
+          "SasToken": "",
+          "ConfigurationFunction": "[variables('IISPowerShellModuleConfigurationFunction')]",
+          "Properties": {
+            "MachineName": "[parameters('vmName')]"
+          }
+        },
+        "protectedSettings": null
+      }
+    },
+    {
+      "apiVersion": "2014-11-01",
+      "name": "[parameters('sqlServerName')]",
+      "type": "Microsoft.Sql/servers",
+      "location": "[parameters('location')]",
+      "tags": {
+        "displayName": "SQLServer"
+      },
+      "properties": {
+        "administratorLogin": "[parameters('sqlServerAdminUsername')]",
+        "administratorLoginPassword": "[parameters('sqlServerAdminPassword')]",
+        "version": "12.0"
+      },
+      "resources": [
+        {
+          "apiVersion": "2014-11-01",
+          "name": "[parameters('sqlDbName')]",
+          "type": "databases",
+          "location": "[parameters('location')]",
+          "tags": {
+            "displayName": "SQLDatabase"
+          },
+          "dependsOn": [
+            "[concat('Microsoft.Sql/servers/', parameters('sqlServerName'))]"
+          ],
+          "properties": {
+            "edition": "[parameters('sqlDbEdition')]",
+            "collation": "[parameters('sqlDbCollation')]",
+            "maxSizeBytes": "[parameters('sqlDbMaxSizeBytes')]",
+            "requestedServiceObjectiveId": "[parameters('sqlDbServiceObjectiveId')]"
+          }
+        },
+        {
+          "apiVersion": "2014-11-01",
+          "name": "SQLServerFirewallRules",
+          "type": "firewallrules",
+          "location": "[parameters('location')]",
+          "dependsOn": [
+            "[concat('Microsoft.Sql/servers/', parameters('sqlServerName'))]"
+          ],
+          "properties": {
+            "endIpAddress": "0.0.0.0",
+            "startIpAddress": "0.0.0.0"
+          }
+        }
+      ]
+    }
+  ]
+}
