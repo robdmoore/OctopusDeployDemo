@@ -11,7 +11,7 @@
         [string]$Password
     )
 
-    Import-Module "C:\Program Files (x86)\Microsoft SDKs\Azure\PowerShell\ServiceManagement\Azure\Azure.psd1"
+    Import-Module "C:\Program Files (x86)\Microsoft SDKs\Azure\PowerShell\ServiceManagement\Azure\Azure.psd1" -Force
     Switch-AzureMode AzureResourceManager
 
     $securePassword = ConvertTo-SecureString $Password -AsPlainText -Force
