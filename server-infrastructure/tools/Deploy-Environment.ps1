@@ -20,6 +20,8 @@ Param(
 
 try {
 
+    Write-Output "Entered Deploy-Environment"
+
     $ErrorActionPreference = "Stop"
     Import-Module (Join-Path $PSScriptRoot AzureFunctions.psm1) -Force
     Set-AzureAPICredentials -TenantId $TenantId -ClientId $ClientId -Password $Password

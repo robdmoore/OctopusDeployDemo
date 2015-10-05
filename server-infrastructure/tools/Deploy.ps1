@@ -1,4 +1,5 @@
-﻿Write-Output $OctopusParameters
+﻿Get-Module | Write-Output
+Write-Output $OctopusParameters
 . (Join-Path $PSScriptRoot "Deploy-Environment.ps1") `
     -SubscriptionId $OctopusParameters["SubscriptionId"]`
     -TenantId $OctopusParameters["TenantId"]`

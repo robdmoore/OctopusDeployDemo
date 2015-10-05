@@ -11,7 +11,6 @@
         [string]$Password
     )
 
-    Get-Module
     Import-Module "C:\Program Files (x86)\Microsoft SDKs\Azure\PowerShell\ServiceManagement\Azure\Azure.psd1"
     Switch-AzureMode AzureResourceManager
 
