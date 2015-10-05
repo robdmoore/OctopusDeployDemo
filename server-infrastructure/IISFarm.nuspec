@@ -1,0 +1,23 @@
+﻿<?xml version='1.0' encoding='UTF-8'?> 
+<package>
+  <metadata>
+    <id>
+       IISFarm
+    </id>
+    <version>
+       1.0.0.0
+    </version>
+    <authors>
+       Robert Moore
+    </authors>
+    <description>
+      Creates IIS Farm in Azure using Azure Resource Manager template deployment.
+    </description>
+    <projectUrl>
+      https://github.com/robdmoore/OctopusDeployDemo
+    </projectUrl>
+  </metadata>
+  <files>
+     <file src="tools\*.*" target="" />
+  </files>
+</package>
