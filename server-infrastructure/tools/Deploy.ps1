@@ -1,5 +1,5 @@
-﻿Get-Module | Write-Output
-Write-Output $OctopusParameters
+﻿Write-Output $OctopusParameters
+
 . (Join-Path $PSScriptRoot "Deploy-Environment.ps1") `
     -SubscriptionId $OctopusParameters["SubscriptionId"]`
     -TenantId $OctopusParameters["TenantId"]`
@@ -13,4 +13,6 @@ Write-Output $OctopusParameters
     -sqlServerAdminPassword $OctopusParameters["sqlServerAdminPassword"]`
     -SqlPerformanceLevel $OctopusParameters["SqlPerformanceLevel"]`
     -vmStorageAccountType $OctopusParameters["vmStorageAccountType"]`
-    -vmSize $OctopusParameters["vmSize"]
+    -vmSize $OctopusParameters["vmSize"]`
+    -octopusApiKey $OctopusParameters["octopusApiKey"]`
+    -octopusServerUrl $OctopusParameters["octopusServerUrl"]

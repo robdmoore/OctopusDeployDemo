@@ -12,6 +12,8 @@ Param(
     [string] [Parameter(Mandatory = $true)] $adminUsername,
     [string] [Parameter(Mandatory = $true)] $adminPassword,
     [string] [Parameter(Mandatory = $true)] $sqlServerAdminPassword,
+    [string] [Parameter(Mandatory = $true)] $octopusApiKey,
+    [string] [Parameter(Mandatory = $true)] $octopusServerUrl,
     [string] $ResourceGroupName = "$AppName-$AppEnvironment-Resources",
     [string] $SqlPerformanceLevel = "S1",
     [string] $vmStorageAccountType = "Standard_LRS",
@@ -45,6 +47,10 @@ try {
         sqlDbEdition = $sqlConfig.Edition;
         sqlDbServiceObjectiveId = $sqlConfig.ServiceObjectiveId;
         networkDnsName = "$($AppName)$($AppEnvironment)VM1".ToLower();
+        octopusApiKey = $octopusApiKey;
+        octopusServerUrl = $octopusServerUrl;
+        octopusEnvironments = @($AppEnvironment);
+        octopusRoles = @("iisfarm");
     };
 
     $Parameters.GetEnumerator() | Sort-Object Name | ForEach-Object {ForEach-Object {"{0}`t{1}" -f $_.Name,($_.Value -join ", ")} | Write-Verbose }

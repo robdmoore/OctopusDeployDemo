@@ -86,6 +86,37 @@
       "metadata": {
         "description": "Unique DNS Name used to access the IIS server via HTTP or RDP."
       }
+    },
+    "octopusApiKey": {
+      "type": "string",
+      "metadata": {
+        "description": "API key to talk to Octopus Deploy server with."
+      }
+    },
+    "octopusServerUrl": {
+      "type": "string",
+      "metadata": {
+        "description": "URL of Octopus Deploy server."
+      }
+    },
+    "octopusEnvironments": {
+      "type": "array",
+      "metadata": {
+        "description": "List of environments to register the tentacle in."
+      }
+    },
+    "octopusRoles": {
+      "type": "array",
+      "metadata": {
+        "description": "List of roles to register the tentacle with."
+      }
+    },
+    "listenPort": {
+      "type": "int",
+      "defaultValue": "10933",
+      "metadata": {
+        "description": "List of environments to register the tentacle in."
+      }
     }
   },
   "variables": {
@@ -102,8 +133,8 @@
     "imagePublisher": "MicrosoftWindowsServer",
     "imageOffer": "WindowsServer",
     "vmExtensionName": "dscExtension",
-    "IISPowerShellModuleUrl": "https://github.com/Azure/azure-quickstart-templates/raw/master/dsc-extension-iis-server-windows-vm/ContosoWebsite.ps1.zip",
-    "IISPowerShellModuleConfigurationFunction": "ContosoWebsite.ps1\\ContosoWebsite"
+    "IISPowerShellModuleUrl": "https://github.com/robdmoore/OctopusDeployDemo/raw/master/server-infrastructure/IISTentacle.ps1.zip",
+    "IISPowerShellModuleConfigurationFunction": "IISTentacle.ps1\\IISTentacle"
   },
   "resources": [
     {
@@ -234,7 +265,11 @@
           "SasToken": "",
           "ConfigurationFunction": "[variables('IISPowerShellModuleConfigurationFunction')]",
           "Properties": {
-            "MachineName": "[parameters('vmName')]"
+            "ApiKey": "[parameters('octopusApiKey')]",
+            "OctopusServerUrl": "[parameters('octopusServerUrl')]",
+            "Environments": "[parameters('octopusEnvironments')]",
+            "Roles": "[parameters('octopusRoles')]",
+            "ListenPort": "[parameters('octopusListenPort')]"
           }
         },
         "protectedSettings": null
