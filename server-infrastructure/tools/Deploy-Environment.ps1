@@ -20,12 +20,11 @@ Param(
 
 try {
 
-    Write-Output "Entered Deploy-Environment"
-
     $ErrorActionPreference = "Stop"
     Import-Module (Join-Path $PSScriptRoot AzureFunctions.psm1) -Force
     Set-AzureAPICredentials -TenantId $TenantId -ClientId $ClientId -Password $Password
-    Select-AzureSubscription -SubscriptionId $SubscriptionId
+    $sub = Get-AzureSubscription | Where-Object { $_.SubscriptionId -eq $SubscriptionId } | Select-Object -First 1
+    Select-AzureSubscription -SubscriptionName $sub.SubscriptionName
     $TenantId = (Get-AzureSubscription -Current).TenantId
     Write-Output "Connected to Azure API"
 
