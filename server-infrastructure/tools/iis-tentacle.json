@@ -248,11 +248,11 @@
         }
       }
     },
-    {
+    /*{
       "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[concat(variables('vmName'),'/CustomScriptExtension')]",
+      "name": "[concat(parameters('vmName'),'/CustomScriptExtension')]",
       "apiVersion": "2015-05-01-preview",
-      "location": "[resourceGroup().location]",
+      "location": "[parameters('location')]",
       "dependsOn": [
         "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
       ],
@@ -264,7 +264,7 @@
              "commandToExecute": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"iex ((new-object net.webclient).DownloadString('https://github.com/robdmoore/OctopusDeployDemo/raw/master/server-infrastructure/InstallOctopusDsc.ps1'))\""
           }
       }
-    },
+    },*/
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(parameters('vmName'),'/', variables('vmExtensionName'))]",
