@@ -111,8 +111,8 @@
         "description": "List of roles to register the tentacle with."
       }
     },
-    "listenPort": {
-      "type": "int",
+    "octopusListenPort": {
+      "type": "string",
       "defaultValue": "10933",
       "metadata": {
         "description": "List of environments to register the tentacle in."
@@ -246,6 +246,23 @@
             }
           ]
         }
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(variables('vmName'),'/CustomScriptExtension')]",
+      "apiVersion": "2015-05-01-preview",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+      ],
+      "properties": {
+         "publisher": "Microsoft.Compute",
+         "type": "CustomScriptExtension",
+          "typeHandlerVersion": "1.2",
+          "settings": {
+             "commandToExecute": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"iex ((new-object net.webclient).DownloadString('https://github.com/robdmoore/OctopusDeployDemo/raw/master/server-infrastructure/InstallOctopusDsc.ps1'))\""
+          }
       }
     },
     {
